@@ -54,12 +54,27 @@ WordPress コアの表示系は `response` しか見ません。そのため更�
 
 ## インストール
 
-1. このリポジトリを zip でダウンロードするか、`wp-content/plugins/` に配置する。
+1. このリポジトリを zip でダウンロードするか、`wp-content/plugins/core-requirement-update-notice/` に配置する。
 2. 管理画面の「プラグイン」から有効化する。
 
-単一ファイルのプラグインなので、`core-requirement-update-notice.php` を `wp-content/plugins/` 直下に置くだけでも動作します。
+**プラグインはディレクトリごと配置してください。** メインファイルは `includes/` 以下を読み込むだけなので、`core-requirement-update-notice.php` を単体で置いても動作しません（v1.3.1 以前は単一ファイルでした）。
 
 設定画面はありません。有効化した時点で動作します。
+
+### ファイル構成
+
+| ファイル | 役割 |
+| --- | --- |
+| `core-requirement-update-notice.php` | プラグインヘッダーと `includes/` の読み込みのみ |
+| `includes/detection.php` | 更新トランジェントの走査と非互換エントリの検出 |
+| `includes/messages.php` | 警告文・リンクの組み立て（出力はしない） |
+| `includes/plugins-list.php` | プラグイン一覧への表示 |
+| `includes/themes-list.php` | テーマ一覧への表示 |
+| `includes/update-core.php` | 更新一覧のセクション出力と位置の入れ替え |
+| `includes/assets.php` | 見た目を調整するインライン JS |
+| `includes/auto-update.php` | 自動更新の抑止 |
+
+クラスを持たない名前空間付き関数の集まりなので、オートローダーは使わず `require_once` で並べています。各ファイルは読み込み時に自分のフック登録を済ませます。
 
 ## 仕組み
 
