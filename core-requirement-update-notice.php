@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Core Requirement Update Notice
  * Description:       更新は提供されているが、新バージョンが要求する WordPress コアバージョンを満たしていないプラグインについて、プラグイン一覧／更新一覧に PHP 非互換時と同等の警告を表示します。
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 5.2
  * Requires PHP:      7.4
  * License:           GPL-2.0-or-later
@@ -342,7 +342,23 @@ function render_own_update_row( $file, $plugin_data ) {
  * list_plugin_updates() は get_plugin_updates()（= response のみ）を見るため、
  * hidden なプラグインはテーブルに 1 行も出ない。テーブル群の直後に発火する
  * core_upgrade_preamble で、独自のセクションとして補う。
+ *
+ * ただし core_upgrade_preamble は「コア・プラグイン・テーマ・翻訳」を
+ * すべて出し切った後に発火するため、そのままだとページ最下部に出てしまう。
+ * 「プラグイン」と「テーマ」の間には PHP のフックが一切無いので、
+ * 出力をマーカーで囲んでおき、ページの出力バッファ上でテーマ見出しの直前へ
+ * 移動させる（下の move_section_before_themes() を参照）。
  * ---------------------------------------------------------------------- */
+
+/**
+ * 移動対象セクションの開始マーカー。HTML コメントなので残っても無害。
+ */
+const SECTION_MARKER_OPEN = '<!--core-req-notice:section-->';
+
+/**
+ * 移動対象セクションの終了マーカー。
+ */
+const SECTION_MARKER_CLOSE = '<!--/core-req-notice:section-->';
 
 add_action( 'core_upgrade_preamble', __NAMESPACE__ . '\\render_update_core_section' );
 
@@ -371,6 +387,8 @@ function render_update_core_section() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 	$installed = get_plugins();
+
+	echo SECTION_MARKER_OPEN; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 固定のマーカー文字列。
 	?>
 	<h2>
 		<?php
@@ -420,6 +438,110 @@ function render_update_core_section() {
 		</tbody>
 	</table>
 	<?php
+	echo SECTION_MARKER_CLOSE; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 固定のマーカー文字列。
+}
+
+add_action( 'admin_head', __NAMESPACE__ . '\\maybe_buffer_update_core', 0 );
+
+/**
+ * 更新一覧の本文出力をバッファリングする。
+ *
+ * admin-header.php の中で発火する admin_head は、テーブル群が描画される前。
+ * ここでバッファを開始しておき、shutdown 時のフラッシュでコールバックが
+ * ページ全体の HTML を受け取れるようにする。
+ *
+ * do-plugin-upgrade などの進捗をストリーム出力するアクションでは
+ * バッファリングすると表示が固まるので、一覧画面のときだけ開始する。
+ *
+ * @return void
+ */
+function maybe_buffer_update_core() {
+	$screen = get_current_screen();
+
+	if ( ! $screen || ! in_array( $screen->id, array( 'update-core', 'update-core-network' ), true ) ) {
+		return;
+	}
+
+	// update-core.php と同じ既定値で action を解決する。
+	$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : 'upgrade-core'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- 表示位置の判定のみ。
+
+	if ( 'upgrade-core' !== $action ) {
+		return;
+	}
+
+	// 出すものが無いならバッファリング自体を行わない。
+	$hidden = array_filter(
+		get_incompatible_updates(),
+		static function ( $entry ) {
+			return $entry['hidden'];
+		}
+	);
+
+	if ( empty( $hidden ) ) {
+		return;
+	}
+
+	ob_start( __NAMESPACE__ . '\\move_section_before_themes' );
+}
+
+/**
+ * マーカーで囲んだセクションを「テーマ」見出しの直前へ移動する。
+ *
+ * 見出しが見つからない場合（テーマ更新権限が無い等）は何もせず、
+ * core_upgrade_preamble が出力した元の位置（ページ末尾）のまま残す。
+ *
+ * @param string $html バッファリングされたページ HTML。
+ * @return string
+ */
+function move_section_before_themes( $html ) {
+	$start = strpos( $html, SECTION_MARKER_OPEN );
+
+	if ( false === $start ) {
+		return $html;
+	}
+
+	$end = strpos( $html, SECTION_MARKER_CLOSE, $start );
+
+	if ( false === $end ) {
+		return $html;
+	}
+
+	$end += strlen( SECTION_MARKER_CLOSE );
+
+	$section = substr( $html, $start, $end - $start );
+
+	// 先にセクションを抜き出しておく。自分自身の見出しにアンカーが当たるのを防ぐため。
+	$rest   = substr( $html, 0, $start ) . substr( $html, $end );
+	$offset = find_section_anchor( $rest );
+
+	if ( null === $offset ) {
+		return $html;
+	}
+
+	return substr( $rest, 0, $offset ) . $section . substr( $rest, $offset );
+}
+
+/**
+ * 挿入位置（テーマ見出しの開始オフセット）を探す。
+ *
+ * list_theme_updates() の見出しは、更新が無ければ `<h2>テーマ</h2>`、
+ * あれば `<h2>\n\tテーマ <span class="count">…` と形が変わるので、
+ * `<h2>` + 空白 + 訳語 の正規表現で両方を拾う。
+ * テーマ節が無い場合は翻訳節の手前にフォールバックする。
+ *
+ * @param string $html 検索対象の HTML。
+ * @return int|null 見つからなければ null。
+ */
+function find_section_anchor( $html ) {
+	foreach ( array( __( 'Themes' ), __( 'Translations' ) ) as $label ) {
+		$pattern = '#<h2>\s*' . preg_quote( $label, '#' ) . '#u';
+
+		if ( preg_match( $pattern, $html, $matches, PREG_OFFSET_CAPTURE ) ) {
+			return $matches[0][1];
+		}
+	}
+
+	return null;
 }
 
 /* -------------------------------------------------------------------------
