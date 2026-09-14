@@ -54,8 +54,10 @@ WordPress コアの表示系は `response` しか見ません。そのため更�
 
 ## インストール
 
-1. このリポジトリを zip でダウンロードするか、`wp-content/plugins/core-requirement-update-notice/` に配置する。
+1. [Releases](https://github.com/lunaluna/core-requirement-update-notice/releases) から zip をダウンロードするか、`wp-content/plugins/core-requirement-update-notice/` に配置する。
 2. 管理画面の「プラグイン」から有効化する。
+
+一度入れてしまえば、以降は **GitHub Releases からの自動アップデート**が有効になり、通常のプラグイン更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できます。wp.org の公式ルートは使わないため、ヘッダーで `Update URI: false` を宣言しています。
 
 **プラグインはディレクトリごと配置してください。** メインファイルは `includes/` 以下を読み込むだけなので、`core-requirement-update-notice.php` を単体で置いても動作しません（v1.3.1 以前は単一ファイルでした）。
 
@@ -72,9 +74,13 @@ WordPress コアの表示系は `response` しか見ません。そのため更�
 | `includes/themes-list.php` | テーマ一覧への表示 |
 | `includes/update-core.php` | 更新一覧のセクション出力と位置の入れ替え |
 | `includes/assets.php` | 見た目を調整するインライン JS |
-| `includes/auto-update.php` | 自動更新の抑止 |
+| `includes/auto-update.php` | 他プラグイン・テーマの自動更新の抑止 |
+| `lib/l2d-updater/` | GitHub Releases からの自動更新ライブラリ（ベンダーコピー） |
+| `bin/build-zip.sh` | 配布用 ZIP のビルド（実処理はライブラリへ委譲） |
 
 クラスを持たない名前空間付き関数の集まりなので、オートローダーは使わず `require_once` で並べています。各ファイルは読み込み時に自分のフック登録を済ませます。
+
+`lib/l2d-updater/` は [l2d-wp-github-update-lib](https://github.com/lunaluna/l2d-wp-github-update-lib) を `git subtree` で取り込んだベンダーコピーです。**直接編集せず、上流を更新して取り込み直してください。** 取り込み元は配布専用タグ `dist-X.Y.Z` で、`.github/workflows/release.yml` が参照する通常のリリースタグ `X.Y.Z` とは別物です。両者の版は必ず揃えてください。PHPCS の検査対象からは除外しています。
 
 ## 仕組み
 

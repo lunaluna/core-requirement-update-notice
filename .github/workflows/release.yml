@@ -1,0 +1,48 @@
+name: Release
+
+# 同梱ライブラリ(lib/l2d-updater)が提供する reusable workflow を呼び、
+# タグから配布用 ZIP を組み立てて GitHub Release を作成する。
+#
+# 参照タグ(@X.Y.Z)は lib/l2d-updater/ のベンダーコピーと必ず揃えること。
+# 片方だけ更新すると、ライブラリ本体と利用側で版が食い違う。ライブラリ側の
+# 反映手順は https://github.com/lunaluna/l2d-wp-github-update-lib を参照
+# (1.1.0 以降、手順はベンダーコピーには同梱されない)。
+#
+# タグに v 接頭辞は付けない慣習(1.3.1 / 1.4.0 ...)。ライブラリ側も 1.1.0 以降は
+# v なしに統一されている。一方 subtree の取り込み元は配布専用タグ dist-X.Y.Z で
+# あり、ここで参照する通常のリリースタグ X.Y.Z とは別物なので混同しないこと。
+
+on:
+  push:
+    tags: ['[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'リリースするタグ (例 1.4.0).'
+        required: true
+
+# 呼び出し先の GITHUB_TOKEN 権限は呼び出し元を超えられないため、
+# Release 作成に必要な contents: write はここで与える必要がある。
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: lunaluna/l2d-wp-github-update-lib/.github/workflows/plugin-release.yml@1.2.0
+    with:
+      slug: core-requirement-update-notice
+      # "path:pattern" 形式。パターンにアンカー(^)を含めてはいけない
+      # (呼び出し先が sed の置換パターンの途中に埋め込むため壊れる)。
+      #
+      # バージョンを書いている箇所を 4 つとも並べてある。1 箇所でも食い違えば
+      # リリースが失敗するので、バンプ漏れがここで止まる。
+      # README.md だけは "- **Stable tag:** 1.3.1" と太字装飾が挟まるため、
+      # 抽出が "** 1.3.1" にならないようパターンに "**" まで含めている。
+      version_files: |
+        core-requirement-update-notice.php:Version:
+        readme.txt:Stable tag:
+        composer.json:"version":
+        README.md:Stable tag:\*\*
+      # readme.txt の "= x.y.z =" 節を抽出する。該当節が無いと
+      # "Release x.y.z." の 1 行になるため、リリース前に必ず追記すること。
+      notes_source: readme.txt

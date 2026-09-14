@@ -38,7 +38,7 @@ WordPress コアの表示系は `response` しか見ないため、更新行が 
 1. このプラグインを**ディレクトリごと** `wp-content/plugins/core-requirement-update-notice/` に配置する。メインファイルは `includes/` 以下を読み込むだけなので、単体で置いても動作しません。
 2. WordPress の「プラグイン」画面で **Core Requirement Update Notice** を有効化する。
 
-設定は不要です。
+設定は不要です。以降は GitHub Releases からの自動アップデートが有効になり、通常のプラグイン更新フロー（更新通知 → ワンクリック更新）で更新できます。
 
 == Frequently Asked Questions ==
 

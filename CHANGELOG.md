@@ -26,7 +26,13 @@
 
   **これにより「単一ファイルを `wp-content/plugins/` 直下に置くだけで動く」性質は失われた。** ディレクトリごと配置する必要がある。`README.md` と `readme.txt` の導入手順もあわせて更新した。
 
-コメント・設定・ファイル配置の変更のみで、**動作の変更はない**。翻訳対象の文字列（画面に表示される文言）は句点のまま変更していない。
+- **GitHub Releases からの自動アップデート機構を追加した。** [l2d-wp-github-update-lib](https://github.com/lunaluna/l2d-wp-github-update-lib) を `git subtree` で `lib/l2d-updater/`（配布専用タグ `dist-1.2.0`）に取り込み、メインファイルから登録している。管理画面の通常の更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できる。
+
+  既存の独自更新機構が無い新規導入のため、後方互換用の `cache_key` / `filter_prefix` は渡さず既定値に任せている。あわせてリリース基盤として `.github/workflows/release.yml`（`plugin-release.yml@1.2.0`）、`bin/build-zip.sh`、`.distignore` を追加した。`release.yml` の `version_files` にはバージョンを書いている 4 ファイル（プラグインヘッダー / `readme.txt` / `composer.json` / `README.md`）をすべて並べてあるので、1 箇所でもバンプ漏れがあればリリースが失敗する。
+
+  PHPCS はベンダーコピーを検査対象から外した（`lib/` を除外）。上流側に独自の設定がある。
+
+コメント・設定・ファイル配置の変更が主で、**既存機能の動作は変わっていない**。翻訳対象の文字列（画面に表示される文言）は句点のまま変更していない。
 
 ## [1.3.1] - 2026-09-14
 

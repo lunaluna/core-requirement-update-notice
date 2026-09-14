@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+.gitattributes
+.editorconfig
+.distignore
+.claude
+.DS_Store
+bin
+vendor
+composer.json
+composer.lock
+phpcs.xml.dist
