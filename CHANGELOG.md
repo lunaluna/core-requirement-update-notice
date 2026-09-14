@@ -5,34 +5,36 @@
 書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョン番号は [Semantic Versioning](https://semver.org/lang/ja/) に従います。
 
 > **履歴の出自について**
-> このプラグインはもともと WordPress サイトの `wp-content/plugins` 配下で git 管理外のまま開発されていたものを、後から単体リポジトリとして切り出したものです。1.0.0〜1.3.1 のコミットは、そのときのバージョンごとのスナップショットを時系列に並べ直したもので、実際の作業履歴ではありません。そのため下記の日付はすべてリポジトリ初期化日（2026-09-14）であり、各版が実際に書かれた日ではありません。
+> このプラグインはもともと WordPress サイトの `wp-content/plugins` 配下で git 管理外のまま開発されていたものを、後から単体リポジトリとして切り出したものです。**1.0.0〜1.3.1** のコミットは、そのときのバージョンごとのスナップショットを時系列に並べ直したもので、実際の作業履歴ではありません。それらの日付はすべてリポジトリ初期化日（2026-09-14）であり、各版が実際に書かれた日ではありません。1.4.0 以降は通常の履歴です。
+>
+> 1.3.1 以前にはタグがありません（リポジトリ化した時点で既に過去の版だったため）。そのため下のバージョン見出しのうち、リンクになっているのは 1.4.0 だけです。
 
-## [Unreleased]
+## [1.4.0] - 2026-09-14
+
+配布物としての体裁を整えた版。**警告を出す機能そのものは 1.3.1 から変わっていない。**
 
 ### Added
 
+- **GitHub Releases からの自動アップデート機構。** [l2d-wp-github-update-lib](https://github.com/lunaluna/l2d-wp-github-update-lib) を `git subtree` で `lib/l2d-updater/`（配布専用タグ `dist-1.2.0`）に取り込み、メインファイルから登録している。管理画面の通常の更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できる。
+
+  既存の独自更新機構が無い新規導入のため、後方互換用の `cache_key` / `filter_prefix` は渡さず既定値に任せている。
+
+- **リリース基盤。** `.github/workflows/release.yml`（`plugin-release.yml@1.2.0`）、`bin/build-zip.sh`、`.distignore` を追加した。`release.yml` の `version_files` にはバージョンを書いている 4 ファイル（プラグインヘッダー / `readme.txt` / `composer.json` / `README.md`）をすべて並べてあるので、1 箇所でもバンプ漏れがあればリリースが失敗する。
 - `README.md` / `readme.txt` / `CHANGELOG.md` を追加した。
-- `LICENSE`（GPL-2.0 全文）を同梱した。ヘッダーと readme.txt で `GPLv2 or later` を宣言しているのに全文が無かったため。
+- `LICENSE`（GPL-2.0 全文）を同梱した。ヘッダーと `readme.txt` で `GPLv2 or later` を宣言しているのに全文が無かったため。
 - プラグインヘッダーに `Plugin URI` / `Tested up to` / `Author` / `Author URI` / `Update URI` / `License URI` / `Text Domain` を追加し、他プラグインと表記を揃えた。`License` の表記も `GPL-2.0-or-later` から `GPLv2 or later` に変更した（ライセンス自体は変更なし）。
-- PHPCS の設定（`phpcs.xml.dist`）と、開発用依存を管理する `composer.json` を追加した。構成は他リポジトリに合わせて `WordPress-Extra`（`WordPress.Files.FileName` は除外）+ `WordPress-Docs` + `PHPCompatibilityWP`。`composer lint` / `composer lint:fix` で実行する。
+- PHPCS の設定（`phpcs.xml.dist`）と、開発用依存を管理する `composer.json` を追加した。構成は他リポジトリに合わせて `WordPress-Extra`（`WordPress.Files.FileName` は除外）+ `WordPress-Docs` + `PHPCompatibilityWP`。`composer lint` / `composer lint:fix` で実行する。ベンダーコピー（`lib/`）は検査対象から外している。
 
 ### Changed
 
+- **プラグインを機能ごとのファイルへ分割した。** メインファイル `core-requirement-update-notice.php` はプラグインヘッダーと読み込みだけになり、実体は `includes/` 以下の 7 ファイル（`detection` / `messages` / `plugins-list` / `themes-list` / `update-core` / `assets` / `auto-update`）へ移した。関数 21 個・フック登録 7 個はすべて移動のみで、コード本体に変更はない（トークン列で照合済み。差分は各ファイルの `namespace` 宣言と `ABSPATH` ガード、メインファイルの `require_once` の追加だけ）。
 - コメントの文末を句点「。」から半角ピリオド「.」に変更した。PHPCS のコメント系スニフはラテン文字の終端記号を要求するため、スニフを除外するのではなくコード側を規約に合わせる方針を採った（他リポジトリと同じ流儀）。docblock の長い説明が小文字の識別子で始まる箇所は、識別子をバッククォートで囲んで解消した。
 - 区切りコメントを PHPCS の規約に合う形へ整えた。意図的な逸脱 2 箇所（型注釈のみの docblock、コアの訳語を引くためのテキストドメイン未指定）には理由付きの `phpcs:ignore` を入れた。
-- プラグインヘッダーの `Description` も文末が半角ピリオドになった。プラグイン一覧に表示される文言だが、変更は句読点のみ。
+- プラグインヘッダーの `Description` も文末が半角ピリオドになった。プラグイン一覧に表示される文言だが、変更は句読点のみ。翻訳対象の文字列（画面に表示される文言）は句点のまま変更していない。
 
-- **プラグインを機能ごとのファイルへ分割した。** メインファイル `core-requirement-update-notice.php` はプラグインヘッダーと読み込みだけになり、実体は `includes/` 以下の 7 ファイル（`detection` / `messages` / `plugins-list` / `themes-list` / `update-core` / `assets` / `auto-update`）へ移した。関数 21 個・フック登録 7 個はすべて移動のみで、コード本体に変更はない（トークン列で照合済み。差分は各ファイルの `namespace` 宣言と `ABSPATH` ガード、メインファイルの `require_once` の追加だけ）。
+### 互換性についての注意
 
-  **これにより「単一ファイルを `wp-content/plugins/` 直下に置くだけで動く」性質は失われた。** ディレクトリごと配置する必要がある。`README.md` と `readme.txt` の導入手順もあわせて更新した。
-
-- **GitHub Releases からの自動アップデート機構を追加した。** [l2d-wp-github-update-lib](https://github.com/lunaluna/l2d-wp-github-update-lib) を `git subtree` で `lib/l2d-updater/`（配布専用タグ `dist-1.2.0`）に取り込み、メインファイルから登録している。管理画面の通常の更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できる。
-
-  既存の独自更新機構が無い新規導入のため、後方互換用の `cache_key` / `filter_prefix` は渡さず既定値に任せている。あわせてリリース基盤として `.github/workflows/release.yml`（`plugin-release.yml@1.2.0`）、`bin/build-zip.sh`、`.distignore` を追加した。`release.yml` の `version_files` にはバージョンを書いている 4 ファイル（プラグインヘッダー / `readme.txt` / `composer.json` / `README.md`）をすべて並べてあるので、1 箇所でもバンプ漏れがあればリリースが失敗する。
-
-  PHPCS はベンダーコピーを検査対象から外した（`lib/` を除外）。上流側に独自の設定がある。
-
-コメント・設定・ファイル配置の変更が主で、**既存機能の動作は変わっていない**。翻訳対象の文字列（画面に表示される文言）は句点のまま変更していない。
+**「単一ファイルを `wp-content/plugins/` 直下に置くだけで動く」性質は失われた。** ディレクトリごと配置する必要がある。`core-requirement-update-notice.php` だけを手で置いていた場合は、ディレクトリごと入れ替えること。
 
 ## [1.3.1] - 2026-09-14
 
@@ -110,9 +112,4 @@
   - 更新一覧: `list_plugin_updates()` にフィルターが無いため、JS で行を特定して注記を追加しチェックボックスを無効化する。
   - `auto_update_plugin` で自動更新の対象から外す（毎回失敗するため）。
 
-[Unreleased]: https://github.com/lunaluna/core-requirement-update-notice/compare/v1.3.1...HEAD
-[1.3.1]: https://github.com/lunaluna/core-requirement-update-notice/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/lunaluna/core-requirement-update-notice/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/lunaluna/core-requirement-update-notice/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/lunaluna/core-requirement-update-notice/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/lunaluna/core-requirement-update-notice/releases/tag/v1.0.0
+[1.4.0]: https://github.com/lunaluna/core-requirement-update-notice/releases/tag/1.4.0

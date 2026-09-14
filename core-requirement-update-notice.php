@@ -3,7 +3,7 @@
  * Plugin Name:       Core Requirement Update Notice
  * Plugin URI:        https://github.com/lunaluna/core-requirement-update-notice
  * Description:       更新は提供されているが、新バージョンが要求する WordPress コアバージョンを満たしていないプラグイン・テーマについて、プラグイン一覧／テーマ一覧／更新一覧に PHP 非互換時と同等の警告を表示します.
- * Version:           1.3.1
+ * Version:           1.4.0
  * Requires at least: 5.2
  * Tested up to:      6.8
  * Requires PHP:      7.4

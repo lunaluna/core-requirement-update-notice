@@ -2,7 +2,7 @@
     "name": "lunaluna/core-requirement-update-notice",
     "description": "更新は提供されているが、新バージョンが要求する WordPress コアバージョンを満たしていないプラグイン・テーマに、PHP 非互換時と同等の警告を表示するプラグイン.",
     "type": "wordpress-plugin",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "license": "GPL-2.0-or-later",
     "require": {
         "php": ">=7.4"

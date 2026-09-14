@@ -3,7 +3,7 @@ Contributors: lunaluna_dev
 Tags: updates, compatibility, admin, notice, maintenance
 Requires at least: 5.2
 Tested up to: 6.8
-Stable tag: 1.3.1
+Stable tag: 1.4.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -35,7 +35,7 @@ WordPress コアの表示系は `response` しか見ないため、更新行が 
 
 == Installation ==
 
-1. このプラグインを**ディレクトリごと** `wp-content/plugins/core-requirement-update-notice/` に配置する。メインファイルは `includes/` 以下を読み込むだけなので、単体で置いても動作しません。
+1. [Releases](https://github.com/lunaluna/core-requirement-update-notice/releases) から zip をダウンロードし、**ディレクトリごと** `wp-content/plugins/core-requirement-update-notice/` に配置する。メインファイルは `includes/` 以下を読み込むだけなので、単体で置いても動作しません。
 2. WordPress の「プラグイン」画面で **Core Requirement Update Notice** を有効化する。
 
 設定は不要です。以降は GitHub Releases からの自動アップデートが有効になり、通常のプラグイン更新フロー（更新通知 → ワンクリック更新）で更新できます。
@@ -66,6 +66,15 @@ WordPress 本体を更新してください。更新後は対象のプラグイ�
 
 詳細は CHANGELOG.md を参照してください。
 
+= 1.4.0 =
+* GitHub Releases からの自動アップデートに対応した。管理画面の通常の更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できる。
+* プラグインを機能ごとのファイルに分割した（メインファイル + `includes/` 以下の 7 ファイル）。**このため単一ファイルでの設置はできなくなり、ディレクトリごと配置する必要がある。**
+* `LICENSE`（GPL-2.0 全文）、`README.md`、`readme.txt`、`CHANGELOG.md` を同梱した。
+* プラグインヘッダーに `Plugin URI` / `Tested up to` / `Author` / `Update URI` / `Text Domain` などを追加した。
+* コーディング規約（PHPCS）の設定を追加し、コメントの表記を揃えた。
+
+警告の出し方そのものは 1.3.1 から変わっていない。
+
 = 1.3.1 =
 * 更新一覧の文言を修正。2 文が並列で現状が読み取りにくかったため、逆接でつないで「すでに新しい版が出ている」ことを明示するようにした。
 
@@ -85,6 +94,9 @@ WordPress 本体を更新してください。更新後は対象のプラグイ�
 * 初版。
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+GitHub Releases からの自動アップデートに対応しました。**ファイル構成が変わり、単一ファイルでの設置はできなくなっています。** 手動で `core-requirement-update-notice.php` だけを置いていた場合は、ディレクトリごと入れ替えてください。警告の出し方そのものは変わりません。
 
 = 1.3.1 =
 更新一覧の文言を分かりやすくしました。

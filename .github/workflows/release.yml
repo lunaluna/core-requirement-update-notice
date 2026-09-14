@@ -36,8 +36,8 @@ jobs:
       #
       # バージョンを書いている箇所を 4 つとも並べてある。1 箇所でも食い違えば
       # リリースが失敗するので、バンプ漏れがここで止まる。
-      # README.md だけは "- **Stable tag:** 1.3.1" と太字装飾が挟まるため、
-      # 抽出が "** 1.3.1" にならないようパターンに "**" まで含めている。
+      # README.md だけは "- **Stable tag:** 1.4.0" と太字装飾が挟まるため、
+      # 抽出が "** 1.4.0" にならないようパターンに "**" まで含めている。
       version_files: |
         core-requirement-update-notice.php:Version:
         readme.txt:Stable tag:
