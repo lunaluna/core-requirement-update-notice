@@ -1,11 +1,18 @@
 <?php
 /**
  * Plugin Name:       Core Requirement Update Notice
+ * Plugin URI:        https://github.com/lunaluna/core-requirement-update-notice
  * Description:       更新は提供されているが、新バージョンが要求する WordPress コアバージョンを満たしていないプラグイン・テーマについて、プラグイン一覧／テーマ一覧／更新一覧に PHP 非互換時と同等の警告を表示します。
  * Version:           1.3.1
  * Requires at least: 5.2
+ * Tested up to:      6.8
  * Requires PHP:      7.4
- * License:           GPL-2.0-or-later
+ * Author:            lunaluna_dev
+ * Author URI:        https://profiles.wordpress.org/lunaluna_dev/
+ * Update URI:        false
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       core-req-notice
  *
  * @package L2D\CoreReqNotice
  */
