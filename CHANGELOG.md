@@ -12,12 +12,17 @@
 ### Added
 
 - `README.md` / `readme.txt` / `CHANGELOG.md` を追加した。
+- `LICENSE`（GPL-2.0 全文）を同梱した。ヘッダーと readme.txt で `GPLv2 or later` を宣言しているのに全文が無かったため。
 - プラグインヘッダーに `Plugin URI` / `Tested up to` / `Author` / `Author URI` / `Update URI` / `License URI` / `Text Domain` を追加し、他プラグインと表記を揃えた。`License` の表記も `GPL-2.0-or-later` から `GPLv2 or later` に変更した（ライセンス自体は変更なし）。
-- PHPCS の設定（`phpcs.xml.dist`）を追加した。WordPress 標準をベースに、日本語コメントと噛み合わない 3 つのスニフ（`Squiz.Commenting.InlineComment.InvalidEndChar` / `Squiz.Commenting.FunctionComment.ParamCommentFullStop` / `Generic.Commenting.DocComment.LongNotCapital`）を除外している。
+- PHPCS の設定（`phpcs.xml.dist`）と、開発用依存を管理する `composer.json` を追加した。構成は他リポジトリに合わせて `WordPress-Extra`（`WordPress.Files.FileName` は除外）+ `WordPress-Docs` + `PHPCompatibilityWP`。`composer lint` / `composer lint:fix` で実行する。
 
 ### Changed
 
-- 区切りコメントを PHPCS の規約に合う形へ整えた。意図的な逸脱 2 箇所（型注釈のみの docblock、コアの訳語を引くためのテキストドメイン未指定）には理由付きの `phpcs:ignore` を入れた。挙動の変更はない。
+- コメントの文末を句点「。」から半角ピリオド「.」に変更した。PHPCS のコメント系スニフはラテン文字の終端記号を要求するため、スニフを除外するのではなくコード側を規約に合わせる方針を採った（他リポジトリと同じ流儀）。docblock の長い説明が小文字の識別子で始まる箇所は、識別子をバッククォートで囲んで解消した。
+- 区切りコメントを PHPCS の規約に合う形へ整えた。意図的な逸脱 2 箇所（型注釈のみの docblock、コアの訳語を引くためのテキストドメイン未指定）には理由付きの `phpcs:ignore` を入れた。
+- プラグインヘッダーの `Description` も文末が半角ピリオドになった。プラグイン一覧に表示される文言だが、変更は句読点のみ。
+
+いずれもコメントと設定の変更で、**動作の変更はない**。翻訳対象の文字列（画面に表示される文言）は句点のまま変更していない。
 
 ## [1.3.1] - 2026-09-14
 

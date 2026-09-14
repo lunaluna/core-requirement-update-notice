@@ -1,40 +1,28 @@
 <?xml version="1.0"?>
-<ruleset name="Core Requirement Update Notice">
-	<description>WordPress コーディング規約に準拠させるための PHPCS 設定。</description>
+<ruleset name="CoreRequirementUpdateNotice">
+	<description>Coding standards for Core Requirement Update Notice.</description>
 
-	<!-- 検査対象: リポジトリ直下の PHP。会話ログや依存物は対象外。 -->
 	<file>.</file>
-	<exclude-pattern>/history/*</exclude-pattern>
 	<exclude-pattern>/vendor/*</exclude-pattern>
-	<exclude-pattern>/node_modules/*</exclude-pattern>
 
-	<arg name="extensions" value="php"/>
-	<arg name="colors"/>
-	<!-- s: 違反したスニフ名を表示 / p: 進捗表示 -->
 	<arg value="sp"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
 
-	<!-- プラグインヘッダーの Requires at least と揃える。非推奨関数の判定に使われる。 -->
+	<!-- プラグインヘッダーの Requires at least / Requires PHP と揃える. -->
 	<config name="minimum_wp_version" value="5.2"/>
+	<config name="testVersion" value="7.4-"/>
 
-	<rule ref="WordPress">
-		<!--
-		以下 3 つは「コメントがラテン文字で書かれている」ことを前提にしたスニフで、
-		日本語コメントとは原理的に噛み合わないため除外する。
-
-		- InvalidEndChar / ParamCommentFullStop:
-		  日本語の文末は句点「。」であり、スニフが探す "." "!" "?" にはならない。
-		- LongNotCapital:
-		  日本語に大文字・小文字の区別が無い。
-
-		コメントを英語で書けば解消するが、このプラグインはコメントを日本語で
-		揃える方針なので、規約側を緩める形にしている。
-		-->
-		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
-		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
-		<exclude name="Generic.Commenting.DocComment.LongNotCapital"/>
+	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.Files.FileName"/>
 	</rule>
 
-	<!-- 翻訳関数に渡すテキストドメインを固定し、書き間違いを検出する。 -->
+	<rule ref="WordPress-Docs"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+
+	<!-- 翻訳関数に渡すテキストドメインを固定し、書き間違いを検出する. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">

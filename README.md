@@ -95,14 +95,23 @@ WordPress コアの表示系は `response` しか見ません。そのため更�
 
 ## 開発
 
-コーディング規約のチェックには PHPCS（WordPress 標準）を使います。
+開発用の依存関係は Composer で管理します（配布物には含まれません）。
 
 ```sh
-phpcs      # 検査
-phpcbf     # 自動修正
+composer install
+composer lint      # phpcs
+composer lint:fix  # phpcbf
 ```
 
-設定は [`phpcs.xml.dist`](phpcs.xml.dist) にあります。日本語コメントと噛み合わないスニフ（文末の半角ピリオド要求、先頭の大文字要求）を除外している点が他リポジトリと異なります。
+設定は [`phpcs.xml.dist`](phpcs.xml.dist) にあります。`WordPress-Extra` + `WordPress-Docs` + `PHPCompatibilityWP` の構成で、PHP 7.4 以上・WordPress 5.2 以上を前提に検査します。
+
+### コメントの書き方
+
+コメントは日本語で書きますが、**文末は句点「。」ではなく半角ピリオド「.」で終えます**。PHPCS のコメント系スニフがラテン文字の終端記号を要求するためで、スニフを除外するのではなくコード側を規約に合わせる方針です。
+
+また docblock の長い説明が小文字の識別子で始まると「大文字で始めること」の指摘を受けるため、識別子はバッククォートで囲みます（`` `update_plugins` トランジェントには…`` のように）。
+
+翻訳対象の文字列（画面に表示される文言）は通常どおり句点を使います。
 
 ## 変更履歴
 
