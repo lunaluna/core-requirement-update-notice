@@ -276,9 +276,11 @@ function build_details_link( $entry, $plugin_name ) {
 	);
 }
 
-/* -------------------------------------------------------------------------
+/*
+ * -------------------------------------------------------------------------
  * プラグイン一覧（plugins.php / network/plugins.php）
- * ---------------------------------------------------------------------- */
+ * ----------------------------------------------------------------------
+ */
 
 add_action( 'load-plugins.php', __NAMESPACE__ . '\\register_update_row_messages', 30 );
 
@@ -362,7 +364,8 @@ function render_own_update_row( $file, $plugin_data ) {
 		$active_class = is_plugin_active( $file ) ? ' active' : '';
 	}
 
-	/** @var \WP_Plugins_List_Table $wp_list_table */
+	// 型注釈のみの docblock。説明文は不要なので短い説明の要求を無効化する。
+	/** @var \WP_Plugins_List_Table $wp_list_table */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 	$wp_list_table = _get_list_table(
 		'WP_Plugins_List_Table',
 		array( 'screen' => get_current_screen() )
@@ -398,7 +401,8 @@ function render_own_update_row( $file, $plugin_data ) {
 	);
 }
 
-/* -------------------------------------------------------------------------
+/*
+ * -------------------------------------------------------------------------
  * テーマ一覧（themes.php）
  *
  * テーマ側はコアがすでに「新しいバージョンがあるが WP 非互換」の文言を持っている
@@ -412,7 +416,8 @@ function render_own_update_row( $file, $plugin_data ) {
  *
  * hasUpdate の分岐はすべて updateResponse で二重にガードされているので、
  * 「今すぐ更新」ボタンが出ることはない。自前のマークアップも不要。
- * ---------------------------------------------------------------------- */
+ * ----------------------------------------------------------------------
+ */
 
 add_filter( 'wp_prepare_themes_for_js', __NAMESPACE__ . '\\mark_incompatible_theme_updates' );
 
@@ -442,7 +447,8 @@ function mark_incompatible_theme_updates( $prepared_themes ) {
 	return $prepared_themes;
 }
 
-/* -------------------------------------------------------------------------
+/*
+ * -------------------------------------------------------------------------
  * 更新一覧（update-core.php）: no_update 由来の分の一覧
  * list_plugin_updates() / list_theme_updates() はどちらも response しか見ないため
  * （get_plugin_updates() / get_theme_updates()）、隠れている分は 1 行も出ない。
@@ -458,7 +464,8 @@ function mark_incompatible_theme_updates( $prepared_themes ) {
  *   テーマ節     → 「翻訳」見出しの直前
  *
  * 結果として「プラグイン → 補完(プラグイン) → テーマ → 補完(テーマ) → 翻訳」になる。
- * ---------------------------------------------------------------------- */
+ * ----------------------------------------------------------------------
+ */
 
 /**
  * 移動対象セクションのマーカー。HTML コメントなので残っても無害。
@@ -473,12 +480,15 @@ function get_section_markers() {
 		'plugins' => array(
 			'open'    => '<!--core-req-notice:plugins-->',
 			'close'   => '<!--/core-req-notice:plugins-->',
-			'anchors' => array( __( 'Themes' ), __( 'Translations' ) ),
+			// テキストドメインを渡さないのは意図的。コア本体の訳語を引くためで、
+			// 自前のドメインに切り替えると見出しと一致しなくなる。
+			'anchors' => array( __( 'Themes' ), __( 'Translations' ) ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- コアの訳語をそのまま引く。
 		),
 		'themes'  => array(
 			'open'    => '<!--core-req-notice:themes-->',
 			'close'   => '<!--/core-req-notice:themes-->',
-			'anchors' => array( __( 'Translations' ) ),
+			// 同上。コア本体の訳語を引くためテキストドメインを渡さない。
+			'anchors' => array( __( 'Translations' ) ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- コアの訳語をそのまま引く。
 		),
 	);
 }
@@ -766,13 +776,15 @@ function find_section_anchor( $html, $labels ) {
 	return null;
 }
 
-/* -------------------------------------------------------------------------
+/*
+ * -------------------------------------------------------------------------
  * 見た目の調整（JS）
  * - hidden = false: コアが出した notice-warning を notice-error に差し替える。
  * - hidden = true : 自前の行の上（プラグイン本体の行）に update クラスを足し、
  *                   コアの更新行と同じ「枠が繋がった」見た目にする。
  * - update-core.php のテーブル: response 由来の行のチェックボックスを無効化する。
- * ---------------------------------------------------------------------- */
+ * ----------------------------------------------------------------------
+ */
 
 add_action( 'admin_print_footer_scripts', __NAMESPACE__ . '\\print_footer_script' );
 
@@ -869,10 +881,12 @@ function print_footer_script() {
 	<?php
 }
 
-/* -------------------------------------------------------------------------
+/*
+ * -------------------------------------------------------------------------
  * 自動更新の抑止（任意）
  * 非互換のまま自動更新が走ると毎回失敗するため、対象外にする。
- * ---------------------------------------------------------------------- */
+ * ----------------------------------------------------------------------
+ */
 
 add_filter( 'auto_update_plugin', __NAMESPACE__ . '\\block_incompatible_auto_update', 10, 2 );
 add_filter( 'auto_update_theme', __NAMESPACE__ . '\\block_incompatible_auto_update', 10, 2 );
