@@ -1,0 +1,24 @@
+{
+    "name": "lunaluna/core-requirement-update-notice",
+    "description": "更新は提供されているが、新バージョンが要求する WordPress コアバージョンを満たしていないプラグイン・テーマに、PHP 非互換時と同等の警告を表示するプラグイン.",
+    "type": "wordpress-plugin",
+    "version": "1.4.0",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "lint": "phpcs",
+        "lint:fix": "phpcbf"
+    }
+}

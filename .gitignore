@@ -1,1 +1,7 @@
 .DS_Store
+/vendor/
+/core-requirement-update-notice.*.zip
+
+# Claude Code のセッション用ローカルディレクトリ（メモリ・ロックファイル等）。
+# リポジトリには含めない方針。
+/.claude/

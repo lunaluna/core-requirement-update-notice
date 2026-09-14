@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="CoreRequirementUpdateNotice">
+	<description>Coding standards for Core Requirement Update Notice.</description>
+
+	<file>.</file>
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<!--
+	lib/ は git subtree で取り込んだベンダーコピー（l2d-wp-github-update-lib）.
+	直接編集しない方針なので検査対象から外す. 上流側に独自の phpcs 設定がある.
+	-->
+	<exclude-pattern>/lib/*</exclude-pattern>
+
+	<arg value="sp"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+
+	<!-- プラグインヘッダーの Requires at least / Requires PHP と揃える. -->
+	<config name="minimum_wp_version" value="5.2"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
+
+	<rule ref="WordPress-Docs"/>
+
+	<rule ref="PHPCompatibilityWP"/>
+
+	<!-- 翻訳関数に渡すテキストドメインを固定し、書き間違いを検出する. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="core-req-notice"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

@@ -1,0 +1,151 @@
+# Core Requirement Update Notice
+
+WordPress プラグインです。**新しいバージョンは公開されているが、それが要求する WordPress コアバージョンをサイトが満たしていない**プラグイン・テーマについて、プラグイン一覧／テーマ一覧／更新一覧に警告を表示します。WordPress 標準では、この状態の更新は画面上に何も出ません。
+
+- **Requires WordPress:** 5.2+（6.8.8 で動作確認済み）
+- **Requires PHP:** 7.4+
+- **Stable tag:** 1.4.0
+- **License:** GPLv2 or later
+
+## 解決する問題
+
+wp.org の update-check API は、新バージョンが要求する WordPress バージョンをサイトが満たしていない場合、そのプラグイン／テーマを `update_plugins` / `update_themes` トランジェントの `response` ではなく **`no_update` に入れて返します**（`new_version` にはインストール済みより新しい版が入ったまま）。
+
+WordPress コアの表示系は `response` しか見ません。そのため更新行が 1 行も描画されず、**「新しい版が出ていること自体」が管理画面から見えなくなります**。
+
+一方、PHP 要件を満たさない場合は `response` に入ったまま返るため、コアは `notice-error` と「動作しません」の警告を出します。つまり同じ「要件を満たさない更新」でも、
+
+| 満たしていない要件 | コアの挙動 |
+| --- | --- |
+| PHP バージョン | 更新行を出し、赤い警告を表示する |
+| WordPress バージョン | **更新行ごと出ない（無言で消える）** |
+
+という差があります。このプラグインは後者を前者と同じ見え方に揃えます。
+
+放置すると「更新が来ていない」のか「来ているが適用できない」のかが区別できず、サイトを古いまま運用し続ける原因になります。
+
+## 表示される場所
+
+### プラグイン一覧（`plugins.php` / `network/plugins.php`）
+
+コアが更新行を出さないケース（`no_update` 側にいる場合）では、対象プラグインの行の下に、コアの更新行と同じ見た目で `notice-error` の警告行を自前で出します。更新は実行できないため「今すぐ更新」リンクは表示しません。
+
+コアが更新行を出しているケース（`response` 側にいる場合）では、その行のメッセージ末尾に警告を追記し、`notice-warning` を `notice-error` に差し替えたうえで「今すぐ更新」リンクを取り除きます。
+
+### テーマ一覧（`themes.php`）
+
+コア側には既に「新しいバージョンが利用可能ですが、現在使用中の WordPress のバージョンでは動作しません」という表示ロジックがあり、足りないのはデータだけです。`wp_prepare_themes_for_js` で `hasUpdate` / `updateResponse.compatibleWP` / `hasPackage` を立て直し、**コア自身の表示に乗せます**（自前のマークアップは追加しません）。
+
+### 更新一覧（`update-core.php`）
+
+「WordPress の更新が必要なプラグイン」「WordPress の更新が必要なテーマ」という独自セクションを追加します。挿入位置は以下のとおりで、コアの節順に馴染むよう並べ替えています。
+
+```
+プラグイン → [WordPress の更新が必要なプラグイン] → テーマ → [WordPress の更新が必要なテーマ] → 翻訳
+```
+
+コアが `response` 側で更新行を出しているものについては、行に注記を追加したうえでチェックボックスを外して無効化し、一括更新に含まれないようにします。
+
+### 自動更新の抑止
+
+`auto_update_plugin` / `auto_update_theme` フィルターで、コア要件を満たさない更新を自動更新の対象から外します。`Plugin_Upgrader::bulk_upgrade()` は `is_wp_version_compatible()` で事前に弾くため、抑止しないと毎回失敗し続けるためです。
+
+このフィルターは管理画面以外（wp-cron）でも走るので、画面向けの検出処理には依存せず、渡された更新情報だけで判定します。
+
+## インストール
+
+1. [Releases](https://github.com/lunaluna/core-requirement-update-notice/releases) から zip をダウンロードするか、`wp-content/plugins/core-requirement-update-notice/` に配置する。
+2. 管理画面の「プラグイン」から有効化する。
+
+一度入れてしまえば、以降は **GitHub Releases からの自動アップデート**が有効になり、通常のプラグイン更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できます。wp.org の公式ルートは使わないため、ヘッダーで `Update URI: false` を宣言しています。
+
+**プラグインはディレクトリごと配置してください。** メインファイルは `includes/` 以下を読み込むだけなので、`core-requirement-update-notice.php` を単体で置いても動作しません（v1.3.1 以前は単一ファイルでした）。
+
+設定画面はありません。有効化した時点で動作します。
+
+### ファイル構成
+
+| ファイル | 役割 |
+| --- | --- |
+| `core-requirement-update-notice.php` | プラグインヘッダーと `includes/` の読み込みのみ |
+| `includes/detection.php` | 更新トランジェントの走査と非互換エントリの検出 |
+| `includes/messages.php` | 警告文・リンクの組み立て（出力はしない） |
+| `includes/plugins-list.php` | プラグイン一覧への表示 |
+| `includes/themes-list.php` | テーマ一覧への表示 |
+| `includes/update-core.php` | 更新一覧のセクション出力と位置の入れ替え |
+| `includes/assets.php` | 見た目を調整するインライン JS |
+| `includes/auto-update.php` | 他プラグイン・テーマの自動更新の抑止 |
+| `lib/l2d-updater/` | GitHub Releases からの自動更新ライブラリ（ベンダーコピー） |
+| `bin/build-zip.sh` | 配布用 ZIP のビルド（実処理はライブラリへ委譲） |
+| `.distignore` | 配布用 ZIP から除外するものの定義 |
+| `.github/workflows/release.yml` | タグを起点に ZIP を作って Release を公開する |
+
+クラスを持たない名前空間付き関数の集まりなので、オートローダーは使わず `require_once` で並べています。各ファイルは読み込み時に自分のフック登録を済ませます。
+
+`lib/l2d-updater/` は [l2d-wp-github-update-lib](https://github.com/lunaluna/l2d-wp-github-update-lib) を `git subtree` で取り込んだベンダーコピーです。**直接編集せず、上流を更新して取り込み直してください。** 取り込み元は配布専用タグ `dist-X.Y.Z` で、`.github/workflows/release.yml` が参照する通常のリリースタグ `X.Y.Z` とは別物です。両者の版は必ず揃えてください。PHPCS の検査対象からは除外しています。
+
+## 仕組み
+
+### `no_update` の走査
+
+走査する範囲はプラグインとテーマで異なります。
+
+- **プラグイン**: `response` と `no_update` の両方。コアはプラグインの WP 要件を表示判定に使わないため、`response` 側にいるものも自前で警告を足す必要があります。
+- **テーマ**: `no_update` のみ。コア側の表示ロジックは WP 非互換に対応済みなので、`response` 側はコアに任せます。
+
+どちらも `no_update` には「本当に最新」のものが全件入っているため、**インストール済みより新しい版が提示されているもの**だけを拾います（`version_compare()` で判定）。
+
+プラグインの場合、拾ったエントリには `hidden`（= コアが更新行を描画しない）の印を付け、呼び出し側はこれを見て「メッセージの追記で足りるか」「行ごと自前で描画するか」を切り替えます。テーマは `no_update` 由来しか扱わないので、この印はありません。
+
+### 更新一覧のセクション位置
+
+`list_plugin_updates()` の末尾にも `list_theme_updates()` の先頭にも、アクションもフィルターも用意されていません。節と節の間にはフックが一切ないため、フックだけでは正しい位置にセクションを作れません。
+
+そこで、
+
+1. セクションを HTML コメントのマーカーで囲んで `core_upgrade_preamble`（= 全節を出し切った後）で出力する
+2. 一覧画面のときだけ `admin_head` で `ob_start()` を開始する
+3. フラッシュ時のコールバックでマーカー間を抜き出し、本来の見出しの直前へ挿入し直す
+
+という手順を取っています。
+
+見出しはコアの訳語（`__( 'Themes' )` / `__( 'Translations' )`）をそのまま引くため、ロケールに関わらず一致します。また更新の有無でマークアップが変わる（`<h2>テーマ</h2>` と `<h2>\n\tテーマ <span class="count">…`）ので、`<h2>` + 空白 + 訳語 の正規表現で両方を拾います。
+
+アンカーが見つからない場合は移動を諦め、`core_upgrade_preamble` が出力した元の位置（ページ末尾）に残します。**表示自体が消えることはありません。**
+
+なお `do-plugin-upgrade` など進捗をストリーム出力するアクションではバッファリングしません（表示が固まるため）。出すものが 1 件も無い場合も、バッファリング自体を行いません。
+
+## 既知の制限
+
+- **マルチサイトのネットワーク管理テーマ一覧は未対応です。** `wp_prepare_themes_for_js()` は `! is_multisite()` のときしか更新情報を読まず、ネットワーク側は `WP_MS_Themes_List_Table` + `wp_theme_update_row()` という別経路になります（未検証）。プラグイン一覧はネットワーク管理画面にも対応しています。
+- **`Requires at least: 5.2` は下限の目安です。** プラグイン側の判定に使う `is_wp_version_compatible()` が WordPress 5.2 で追加されたことに合わせた値で、実際に動作確認したのは 6.8.8 のみです。テーマ一覧の表示はコア `themes.php` の `updateResponse.compatibleWP` 分岐に依存するため、テーマ側の機能にはより新しいコアが必要な可能性があります（未検証）。
+- **更新一覧のセクション位置は出力バッファに依存します。** 他のプラグインが `update-core.php` の出力を横取りしている場合、位置の調整が効かずページ末尾に残ることがあります（表示は消えません）。
+
+## 開発
+
+開発用の依存関係は Composer で管理します（配布物には含まれません）。
+
+```sh
+composer install
+composer lint      # phpcs
+composer lint:fix  # phpcbf
+```
+
+設定は [`phpcs.xml.dist`](phpcs.xml.dist) にあります。`WordPress-Extra` + `WordPress-Docs` + `PHPCompatibilityWP` の構成で、PHP 7.4 以上・WordPress 5.2 以上を前提に検査します。
+
+### コメントの書き方
+
+コメントは日本語で書きますが、**文末は句点「。」ではなく半角ピリオド「.」で終えます**。PHPCS のコメント系スニフがラテン文字の終端記号を要求するためで、スニフを除外するのではなくコード側を規約に合わせる方針です。
+
+また docblock の長い説明が小文字の識別子で始まると「大文字で始めること」の指摘を受けるため、識別子はバッククォートで囲みます（`` `update_plugins` トランジェントには…`` のように）。
+
+翻訳対象の文字列（画面に表示される文言）は通常どおり句点を使います。
+
+## 変更履歴
+
+[CHANGELOG.md](CHANGELOG.md) を参照してください。
+
+## リンク
+
+- **Plugin URI:** <https://github.com/lunaluna/core-requirement-update-notice>
+- **Author:** [lunaluna_dev](https://profiles.wordpress.org/lunaluna_dev/)
