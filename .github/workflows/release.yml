@@ -31,8 +31,12 @@ jobs:
     uses: lunaluna/l2d-wp-github-update-lib/.github/workflows/plugin-release.yml@1.3.1
     with:
       slug: core-requirement-update-notice
-      # "path:pattern" 形式。パターンにアンカー(^)を含めてはいけない
-      # (呼び出し先が sed の置換パターンの途中に埋め込むため壊れる)。
+      # "path:pattern" 形式。パターンは grep -E の正規表現として使われる.
+      # アンカー(^)は使えるが、行頭が合わないと失敗する(例: ヘッダーの " * Version:" に
+      # "^Version:" と書くと、grep が一致せず「一致する行が見つかりません」で止まる).
+      # ここでは行頭の違いに左右されないよう、アンカーなしで書いている.
+      # (呼び出し先は抽出時に sed の置換パターンの途中へも埋め込むが、^ は行頭を指すだけなので
+      # 壊れない. アンカー付きでリリースが成功した実績がある: flamingo-csv-sjis-exporter 1.3.0.)
       #
       # バージョンを書いている箇所を 4 つとも並べてある。1 箇所でも食い違えば
       # リリースが失敗するので、バンプ漏れがここで止まる。
