@@ -1,0 +1,13 @@
+# 外部 Actions を SHA で固定する運用(plugin-release.yml@1.3.1 側)に合わせ、新しい版への追従は Dependabot に任せる.
+# 対象は .github/workflows/ の uses: の外部 Actions.
+# 現状、このリポジトリの release.yml が使うのは自前ライブラリの reusable workflow(@タグ参照)だけで、
+# 外部 Actions は直接使っていない.ただし今後 ci.yml などを足したときに自動で追従できるよう、先に設定しておく.
+# reusable workflow の参照(@X.Y.Z)は、同梱ライブラリ lib/l2d-updater/ の版と揃える必要があるため、
+# Dependabot が PR を出しても、ライブラリ側の更新(git subtree pull)とセットでなければマージしないこと.
+# composer の require-dev(PHPCS など)は対象外.必要になったら package-ecosystem "composer" を足す.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
