@@ -3,7 +3,7 @@ Contributors: lunaluna_dev
 Tags: updates, compatibility, admin, notice, maintenance
 Requires at least: 5.2
 Tested up to: 6.8
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -66,6 +66,10 @@ WordPress 本体を更新してください。更新後は対象のプラグイ�
 
 詳細は CHANGELOG.md を参照してください。
 
+= 1.4.1 =
+* 同梱している自動アップデート用ライブラリ(l2d-wp-github-update-lib)を 1.2.0 から 1.3.1 へ更新した。更新パッケージのダウンロード先・リダイレクトの検証、展開後のメインファイルの確認、アセット名の完全一致など、更新処理の安全性を高める変更を含む.
+* 警告を出す機能そのものは変わらない.
+
 = 1.4.0 =
 * GitHub Releases からの自動アップデートに対応した。管理画面の通常の更新フロー（更新通知 → ワンクリック更新）でこのプラグイン自身を更新できる。
 * プラグインを機能ごとのファイルに分割した（メインファイル + `includes/` 以下の 7 ファイル）。**このため単一ファイルでの設置はできなくなり、ディレクトリごと配置する必要がある。**
@@ -94,6 +98,9 @@ WordPress 本体を更新してください。更新後は対象のプラグイ�
 * 初版。
 
 == Upgrade Notice ==
+
+= 1.4.1 =
+自動アップデート用ライブラリを更新し、更新処理の安全性を高めました。警告の出し方は変わりません。
 
 = 1.4.0 =
 GitHub Releases からの自動アップデートに対応しました。**ファイル構成が変わり、単一ファイルでの設置はできなくなっています。** 手動で `core-requirement-update-notice.php` だけを置いていた場合は、ディレクトリごと入れ替えてください。警告の出し方そのものは変わりません。

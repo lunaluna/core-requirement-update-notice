@@ -4,7 +4,7 @@ WordPress プラグインです。**新しいバージョンは公開されて�
 
 - **Requires WordPress:** 5.2+（6.8.8 で動作確認済み）
 - **Requires PHP:** 7.4+
-- **Stable tag:** 1.4.0
+- **Stable tag:** 1.4.1
 - **License:** GPLv2 or later
 
 ## 解決する問題
