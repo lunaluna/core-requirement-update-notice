@@ -78,7 +78,7 @@ WordPress コアの表示系は `response` しか見ません。そのため更�
 | `lib/l2d-updater/` | GitHub Releases からの自動更新ライブラリ（ベンダーコピー） |
 | `bin/build-zip.sh` | 配布用 ZIP のビルド（実処理はライブラリへ委譲） |
 | `.distignore` | 配布用 ZIP から除外するものの定義 |
-| `.github/workflows/release.yml` | タグを起点に ZIP を作って Release を公開する |
+| `.github/workflows/release.yml` | タグを起点に ZIP を作って draft の Release を作る（公開は `gh release edit <タグ> --draft=false` で手動） |
 
 クラスを持たない名前空間付き関数の集まりなので、オートローダーは使わず `require_once` で並べています。各ファイルは読み込み時に自分のフック登録を済ませます。
 

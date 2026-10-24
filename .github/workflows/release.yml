@@ -46,3 +46,7 @@ jobs:
       # readme.txt の "= x.y.z =" 節を抽出する。該当節が無いと
       # "Release x.y.z." の 1 行になるため、リリース前に必ず追記すること。
       notes_source: readme.txt
+      # タグを push したら, 公開せずに draft の Release を作る.
+      # draft は /releases/latest に出ないので, 公開するまで各サイトの自動更新に届かない.
+      # アセットの中身を確認してから `gh release edit <tag> --draft=false` で公開する.
+      draft: true
